@@ -10,8 +10,8 @@ const searchBaseURL = "https://api.si.edu/openaccess/api/v1.0/search";
 
 // constructing the initial search query
 // const search =  'mask AND unit_code:"FSG"';
-const search = `Flowers AND unit_code:"CHNDM" AND object_type:"Embroidery (visual works)" AND online_media_type:"Images"`;
-
+//const search = 'title_sort::"UNIDENTIFIED WOMAN"ANDunit_code:"NPG"ANDcontent.indexedStructured.usage_flag[0]:"Unidentified Woman"';
+const search = 'title_sort::"UNIDENTIFIED WOMAN"ANDunit_code:"NPG"ANDcontent.indexedStructured.usage_flag[0]:"Unidentified Woman"';
 
 // array that we will write into
 let myArray = [];
@@ -75,16 +75,17 @@ function fetchAllData(url) {
 function addObject(objectData) {
 
   // we've encountered that some places have data others don't
-  let currentPlace = "";
-  if (objectData.content.indexedStructured.place) {
-    currentPlace = objectData.content.indexedStructured.place[0];
-  }
+  //let currentPlace = "";
+  //if (objectData.content.indexedStructured.place) {
+  //currentPlace = objectData.content.indexedStructured.place[0];
+  //}
 
   myArray.push({
     id: objectData.id,
     title: objectData.title,
     link: objectData.content.descriptiveNonRepeating.record_link,
-    place: currentPlace
+    sitter: objectData.content.indexedStructured.usage_flag,
+    type: objectData.content.indexedStructured.object_type,
   })
 }
 
@@ -93,6 +94,7 @@ fetchSearchData(search);
 
 
 //---------------------------UNIT CODES------------------------------
+//type: objectData.content.freetext.objectType[0].content
 // ACAH: Archives Center, National Museum of American History
 // ACM: Anacostia Community Museum
 // CFCHFOLKLIFE: Smithsonian Center for Folklife and Cultural Heritage

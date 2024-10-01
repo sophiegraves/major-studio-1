@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Quilted History</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <script src="main.js"></script>
+    <div id="name">Sophie Graves</div>
+    <div id="title">A Patchwork History</div>
+    <div id="subtitle">Exploring the quilts in the Smithsonian American Art Museum</div>
+    <div id="subtitle2">This visualization shows the quilts in the Smithsonian American Art Museum's collection.
+        Use the slider to filter the quilts in the collection by year. Click on each quilt to see its name and the year
+        it was made.</div>
+    <div id="slider-container">
+        <input type="range" id="decadeSlider" min="0" max="0" value="0" oninput="updateDecade(this.value)">
+        <div id="tickmarks" class="tickmarks"></div>
+        <span id="decadeValue">All Years</span>
+    </div>
+    <div id="visual-container"></div>
+    <div id="tooltip" class="tooltip" style="display: none;"></div>
+</body>
+
+</html>
