@@ -246,7 +246,6 @@ function displayData(decadeFilter = null, yOffset = 0) {
             });
     }
 
-    // Assuming you have a slider element with id 'decadeSlider'
     const slider = d3.select('#decadeSlider');
     const decadeValue = d3.select('#decadeValue');
 
