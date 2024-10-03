@@ -5,6 +5,7 @@
 ### Option 1: Postal Palette 
 Using data from the National Postal Gallery's collection of stamps, including ink color, year, and value (in cents).
 The visual will include a rectangular area chart, with sub rectangles representing each ink color in the collection, and dimensions based on the number of stamps or stamp sheets in the collection with that particular ink color. Each rectangle will have the visual of a stamp that specific color. When clicking a particular color rectangle, it will open a pop-up that shows a breakdown of additional data - including the total number of stamps/stamp sheets in the collection, average value, and a frequency bar chart of year that stamps of that color were issued.
+
 ![image1](https://github.com/user-attachments/assets/36e97e37-da78-4bcb-b41f-06778a00cbcf)
 
 <br></br>
