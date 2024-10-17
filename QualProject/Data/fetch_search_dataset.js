@@ -94,7 +94,7 @@ function addObject(objectData) {
   let carat = "";
   if (objectData.content.freetext.physicalDescription) {
     for (let item of objectData.content.freetext.physicalDescription) {
-      if (item.label === "Weight") {
+      if (item.label === "Weight" && item.content.includes("ct")) {
         carat = item.content;
         break; // Exit loop once the carat weight is found
       } else { carat = "Unknown" }
@@ -102,12 +102,18 @@ function addObject(objectData) {
   }
 
 
-  // Extract gem type
+  // Extract gem type - type = objectData.content.indexedStructured.scientific_name[0].split(" ")[0];
   let type = "";
-  if (objectData.content.indexedStructured.scientific_name) {
-    type = objectData.content.indexedStructured.scientific_name[0].split(" ")[0];
+  if (objectData.content.freetext.name) {
+    for (let item of objectData.content.freetext.name) {
+      if (item.content.includes("Primary")) {
+        type = item.content.split("-")[0].trim();
+        break; // Exit loop once primary gemstone type is found
+      } else { type = "Unknown" }
+    }
   }
 
+  let color = "Unknown"; // Initialize color for each record
 
   // Extract color information
   if (objectData.content.freetext.physicalDescription) {
@@ -117,21 +123,20 @@ function addObject(objectData) {
         break; // Exit loop once the color is found
       }
     }
-  };
+  }
 
-
-  let imgLink = ""
+  let imgLink = "";
   if (objectData.content.descriptiveNonRepeating.online_media) {
     imgLink = objectData?.content?.descriptiveNonRepeating?.online_media?.media.slice(-1).pop().content;
   } else {
-    imgLink = null
+    imgLink = null;
   }
 
   // Define lists of common shades and hues
   const shades = ["dark", "medium", "light", "med"];
-  const hues = ["blue", "green", "red", "yellow", "orange", "purple", "pink", "brown", "black", "white", "gray", "violet", "colorless", "purpleblue", "yellowgreen"];
+  const hues = ["blue", "green", "red", "yellow", "orange", "purple", "pink", "brown", "black", "white", "gray"];
   const saturation = ["slightly", "very", "extremely", "lightly"];
-  const modifiers = ["yellowish", "reddish", "bluish", "blueish", "greenish", "brownish", "grayish", "pinkish", "purplish", "orangish"];
+  const modifiers = ["yellowish", "reddish", "blueish", "greenish", "brownish", "grayish", "pinkish", "purplish", "orangy"];
   let saturationMultiplier = 1;
 
   // Define a mapping of shades to their numeric values
@@ -148,13 +153,10 @@ function addObject(objectData) {
     "very": 1.2,
     "extremely": 1.3
   };
-
-
-
-
+  const combinedHuesCount = {};
   // Function to classify color descriptors
   function classifyColor(color) {
-    const colorWords = color.toLowerCase().replace(/\//g, " ").split(" ");
+    const colorWords = color.toLowerCase().replace(/[\/\-_,]/g, " ").split(" ");
     const colorShades = [];
     const colorHues = [];
     const colorSaturation = [];
@@ -163,33 +165,61 @@ function addObject(objectData) {
     let shadeCount = 0;
     let saturationMultiplier = 1;
 
+    // Define a mapping for specific hues
+    const hueMapping = {
+      "violet": "purple",
+      "turquoise": "blue",
+      "golden": "yellow"
+    };
+
     colorWords.forEach(word => {
-      if (shades.includes(word)) {
-        colorShades.push(word);
-        shadeSum += shadeValues[word] || 0; // Add the numeric value of the shade
+      // Apply hue mapping
+      const mappedWord = hueMapping[word] || word;
+
+      if (shades.includes(mappedWord)) {
+        colorShades.push(mappedWord);
+        shadeSum += shadeValues[mappedWord] || 0; // Add the numeric value of the shade
         shadeCount++;
-      } if (hues.includes(word)) {
-        colorHues.push(word);
-      } if (saturation.includes(word)) {
-        colorSaturation.push(word);
-        saturationMultiplier = saturationMultipliers[word] || 1; // Set the saturation multiplier
       }
-      if (modifiers.includes(word)) {
-        colorModifiers.push(word);
+      if (hues.includes(mappedWord)) {
+        colorHues.push(mappedWord);
       }
-    })
-      ;
+      if (saturation.includes(mappedWord)) {
+        colorSaturation.push(mappedWord);
+        saturationMultiplier = saturationMultipliers[mappedWord] || 1; // Set the saturation multiplier
+      }
+      if (modifiers.includes(mappedWord)) {
+        colorModifiers.push(mappedWord);
+      }
+    });
+
+    // If no shade is found, default to "medium"
+    if (colorShades.length === 0) {
+      colorShades.push("medium");
+      shadeSum += shadeValues["medium"];
+      shadeCount++;
+    }
 
     const averageShadeValue = shadeCount > 0 ? shadeSum / shadeCount : 0; // Calculate average
     const adjustedShadeValue = averageShadeValue * saturationMultiplier; // Adjust by saturation multiplier
 
+    // Sort hues alphabetically and combine them into a single string
+    const combinedHues = colorHues.sort().join(" ");
+
+    // Update the count of combined hues
+    if (combinedHuesCount[combinedHues]) {
+      combinedHuesCount[combinedHues]++;
+    } else {
+      combinedHuesCount[combinedHues] = 1;
+    }
 
     return {
       shades: colorShades,
       hues: colorHues,
+      combinedHues: combinedHues, // Add combined hues
       saturation: colorSaturation,
       modifiers: colorModifiers,
-      adjustedShadeValue: adjustedShadeValue
+      adjustedShadeValue: adjustedShadeValue,
     };
   }
 
@@ -199,15 +229,16 @@ function addObject(objectData) {
     return match ? parseFloat(match[0]) : null; // Convert to float if match found
   }
 
-  //no duplicates
-  const existingElement = myArray.find((e) => e.id === objectData.id)
+
+  // No duplicates
+  const existingElement = myArray.find((e) => e.id === objectData.id);
   if (!existingElement) {
-    //only single specimans
-    if (specimancount == "1")
+    // Only single specimens
+    if (specimancount == "1") {
       if (color != "Unknown") {
         if (carat != "Unknown") {
-          // if (imgLink != null) {
-          if (objectData.content.indexedStructured.topic[0] = "Mineralogy") {
+          //if (type == "Diamond") {
+          if (objectData.content.indexedStructured.topic[0] === "Mineralogy") {
             const classifiedColor = classifyColor(color);
             const numericCarat = extractCaratValue(carat);
             myArray.push({
@@ -222,13 +253,15 @@ function addObject(objectData) {
               numericCarat: numericCarat,
               shades: classifiedColor.shades,
               hues: classifiedColor.hues,
+              combinedHues: classifiedColor.combinedHues, // Add combined hues
               saturation: classifiedColor.saturation,
               modifiers: classifiedColor.modifiers,
               shadeValue: classifiedColor.adjustedShadeValue,
-            })
+            });
           }
         }
       }
+    }
   }
 }
 
@@ -236,6 +269,7 @@ function addObject(objectData) {
 
 
 fetchSearchData(search);
+
 
 
 //---------------------------UNIT CODES------------------------------
