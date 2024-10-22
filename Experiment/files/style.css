@@ -1,0 +1,19 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#visual-container {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    top: 60;
+    left: 0;
+}
+
+.hexagon {
+    stroke: #fff;
+    stroke-width: 1px;
+}
