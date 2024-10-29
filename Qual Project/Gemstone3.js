@@ -81,12 +81,25 @@ d3.json('datagems.json').then(data => {
     const header = container.append("h1")
         .text("Carats of Color")
         .style("text-align", "left")
-        .style("margin-top", "20px");
+        .style("margin-top", "20px")
+        .style("margin", "10px 20px");
+
+    const subhead = container.append("h2")
+        .text("Exploring the colors of the Smithsonian’s gem collection")
+        .style("text-align", "left")
+        .style("margin", "10px 20px");
+
+    const description = container.append("p")
+        .html("The Smithsonian boasts one of the largest and most colorful gem collections in the world. <p> Hover over any color to see the breakdown of the total carats of all of the gems in the Smithsonian’s collection,and the types of gems in that color.<p> Click on any color to see an additional breakdown of color variations within that specific color.<p>Use the dropdown to look specifically at a certain type of gemstone.")
+        .style("text-align", "left")
+        .style("margin", "10px 20px")
+        .style("margin-right", "40px");
 
 
     // Create a dropdown menu
     const dropdown = container.append("select")
         .attr("id", "gem-type-dropdown")
+        .style("margin", "10px 20px")
         .on("change", function () {
             const selectedType = this.value;
             if (isSubTreemapVisible) {

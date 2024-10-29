@@ -66,7 +66,7 @@ p {
     padding: 20px;
     border-left: 5px solid #ccc;
     background-color: #303030;
-    margin-top: 150px;
+    margin-top: 300px;
     overflow: hidden;
     /* Ensure content does not overflow */
     /* Adjust this value to match the margin-top of the treemap header */
@@ -79,7 +79,7 @@ p {
 }
 
 /* styles.css */
-#backButton {
+#back-button {
     background-color: #4CAF50;
     /* Green background */
     color: white;
@@ -92,13 +92,23 @@ p {
     /* Rounded corners */
     cursor: pointer;
     /* Pointer cursor on hover */
-    font-size: 16px;
+    font-size: 14px;
     /* Font size */
     margin-top: 10px;
     /* Margin at the top */
+    margin-left: 20px;
 }
 
 #backButton:hover {
     background-color: #45a049;
     /* Darker green on hover */
+}
+
+.shiny {
+    fill: url(#shiny-gradient);
+}
+
+#shiny-gradient {
+    stop-color: rgba(255, 255, 255, 0.5);
+    stop-opacity: 0.5;
 }

@@ -31,7 +31,7 @@ d3.json('datagems.json').then(data => {
         .style("margin-top", "20px");
 
     const description = container.append("p")
-        .html("Hover over any color to see the breakdown of the total carats of all of the gems in the Smithsonian’s collection, and the types of gems in that color. Click on any color to see an additional breakdown of color variations within that specific color.")
+        .html("The Smithsonian boasts one of the largest and most colorful gem collections in the world. <p> Hover over any color to see the breakdown of the total carats of all of the gems in the Smithsonian’s collection, and the types of gems in that color. Click on any color to see an additional breakdown of color variations within that specific color.")
         .style("text-align", "left")
         .style("margin", "10px 20px");
 
@@ -66,6 +66,7 @@ d3.json('datagems.json').then(data => {
         .style("cursor", "pointer") // Pointer cursor on hover
         .style("font-size", "16px") // Font size
         .style("margin-top", "10px") // Margin at the top
+        .style("margin-left", "30px") // Margin on the left
         .on("click", () => {
             rectanglesVisible = true;
             isSubTreemapVisible = false; // Update the flag
