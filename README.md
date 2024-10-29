@@ -1,5 +1,23 @@
 # major-studio-1
 
+## Qual Visualization Prototype
+
+### Main Page
+<img width="1171" alt="Screenshot 2024-10-21 at 11 09 44 PM" src="https://github.com/user-attachments/assets/63b5080f-341d-4541-8207-2d05d617c7db">
+
+### When clicking on a specific color
+<img width="1202" alt="Screenshot 2024-10-21 at 11 10 37 PM" src="https://github.com/user-attachments/assets/1ebadd0f-e068-40e3-a17a-5235b3d17357">
+
+### Next Steps
+- Thinking about additional ways to make it interesting (e.g. more on type of gem by color; value of gems, etc.)
+- Looking for additional data sets to bring in to combine & add info e.g. value of gems -> which are the mosts valuable gems in the collection
+- Updating the text & title
+- Reformatting tweaks
+
+
+
+
+
 ## Qual Visualization Sketches
 
 ### Option 1: Postal Palette 
