@@ -2,6 +2,9 @@ d3.json('datagems.json').then(data => {
     // Filter out data points with null primaryColor
     const filteredData = data.filter(d => d.primaryColor !== null);
 
+    // Define the specific gem types to include in the dropdown
+    const gemTypes = ["All", "diamond", "sapphire", "quartz", "topaz", "pearl", "beryl"];
+
     // Group the data by primaryColor and calculate the total numericCarat for each group
     const groupedData = d3.rollup(
         filteredData,
@@ -28,9 +31,26 @@ d3.json('datagems.json').then(data => {
         .style("margin-top", "20px");
 
     const description = container.append("p")
-        .html("This treemap visualizes the distribution of gemstones based on their primary color.<br>The size of each rectangle represents the total carat weight of the gemstones with that primary color.")
+        .html("Hover over any color to see the breakdown of the total carats of all of the gems in the Smithsonian’s collection, and the types of gems in that color. Click on any color to see an additional breakdown of color variations within that specific color.")
         .style("text-align", "left")
         .style("margin", "10px 20px");
+
+    // Create a dropdown menu
+    const dropdown = container.append("select")
+        .attr("id", "gem-type-dropdown")
+        .on("change", function () {
+            const selectedType = this.value;
+            drawTreemap(selectedType === "All" ? null : selectedType); // Pass the selected type to the drawTreemap function
+        });
+
+    // Add options to the dropdown
+    dropdown.selectAll("option")
+        .data(gemTypes)
+        .enter()
+        .append("option")
+        .attr("value", d => d)
+        .text(d => d.charAt(0).toUpperCase() + d.slice(1)); // Capitalize the first letter
+
 
     const svg = container.append("svg");
 
@@ -41,7 +61,7 @@ d3.json('datagems.json').then(data => {
         .style("background-color", "#4CAF50") // Green background
         .style("color", "white") // White text
         .style("padding", "10px 20px") // Padding
-        .style("border", "none") // No border
+        .style("border", "3px") // No border
         .style("border-radius", "5px") // Rounded corners
         .style("cursor", "pointer") // Pointer cursor on hover
         .style("font-size", "16px") // Font size
@@ -283,7 +303,7 @@ d3.json('datagems.json').then(data => {
             "light gray": "#BDBDBD", // light gray
             "medium yellow": "#f1db00",
             "medium blue": "#0064ce",
-            "medium green": "#228b22",
+            "medium green": "#1DB719",
             "medium orange": "#ff7700",
             "medium purple": "#a200bf",
             "medium pink": "#fb00d1",
@@ -366,7 +386,7 @@ d3.json('datagems.json').then(data => {
         <strong>Number of Gemstones:</strong><br> ${d.data.count}<br><br>
         <strong>Average Weight:</strong><br> ${(d.value / d.data.count).toFixed(2)} ct<br><br>
         <strong>LARGEST GEM IN THE COLLECTION</strong><br>
-        <strong>Title:</strong> ${largestGem.title}<br>
+        <strong>Name:</strong> ${largestGem.title}<br>
         <strong>Carat:</strong> ${largestGem.numericCarat} ct<br>
     `);
             d3.select("#info-container h2").html(`${d.data.key.toUpperCase()} ${primaryColor.toUpperCase()}`);
