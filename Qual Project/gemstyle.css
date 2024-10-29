@@ -1,20 +1,22 @@
 /* Set the background color of the body to a really dark grey */
+html,
 body {
     background-color: #303030 !important;
     font-family: 'Jura', sans-serif;
+    height: 100%;
 }
 
 h1 {
     color: #fff;
-    font-size: 36px;
-    font-weight: 500;
+    font-size: 72px;
+    font-weight: 300;
     margin: 10;
     padding: 5;
 }
 
 h2 {
     color: #fff;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 300;
     margin: 10;
     padding: 5;
@@ -51,6 +53,7 @@ p {
 }
 
 #main-container {
+    height: 100%;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -63,13 +66,12 @@ p {
 
 #info-container {
     width: 500px;
+    height: 90%;
     padding: 20px;
     border-left: 5px solid #ccc;
     background-color: #303030;
-    margin-top: 300px;
+    margin-top: 10px;
     overflow: hidden;
-    /* Ensure content does not overflow */
-    /* Adjust this value to match the margin-top of the treemap header */
 }
 
 .info-spacing {
@@ -80,13 +82,11 @@ p {
 
 /* styles.css */
 #back-button {
-    background-color: #4CAF50;
-    /* Green background */
-    color: white;
-    /* White text */
+    background-color: #303030;
+    color: #ffffff;
     padding: 10px 20px;
     /* Padding */
-    border: none;
+    border: 2px solid #ffffff;
     /* No border */
     border-radius: 5px;
     /* Rounded corners */
@@ -100,7 +100,7 @@ p {
 }
 
 #backButton:hover {
-    background-color: #45a049;
+    background-color: #cde4e563;
     /* Darker green on hover */
 }
 

@@ -64,7 +64,26 @@ function isColorDark(color) {
     return brightness < 128;
 }
 
-d3.select("#info-container").style("width", "500px");
+/*d3.select("#info-container").style("width", "500px");
+const infoContainer = d3.select("#info-container");
+
+// Add header and description text to the info container
+const header = infoContainer.append("h1")
+    .text("Carats of Color")
+    .style("text-align", "left")
+    .style("margin-top", "20px")
+    .style("margin", "10px 20px");*/
+
+/*const subhead = infoContainer.append("h2")
+    .text("Exploring the colors of the Smithsonian’s gem collection")
+    .style("text-align", "left")
+    .style("margin", "10px 20px");*/
+
+/*const description = infoContainer.append("p")
+    .html("The Smithsonian boasts one of the largest - and most colorful - gem collections in the world.<br>Here, we explore all of the different shades and hues within the collection. <p><br> <b>Hover</b> over any color to see the breakdown of the total carats of all of the gems in the Smithsonian’s collection, and the types of gems in that color.<p> <b>Click</b> on any color to see an additional breakdown of color variations within that specific color.<p><b>Use the dropdown</b> to look specifically at a certain type of gemstone.")
+    .style("text-align", "left")
+    .style("margin", "10px 20px")
+    .style("margin-right", "40px");*/
 
 d3.json('datagems.json').then(data => {
     // Filter out data points with null primaryColor
@@ -76,7 +95,6 @@ d3.json('datagems.json').then(data => {
     // Select the treemap div
     const container = d3.select("#treemap");
 
-
     // Add header and description text
     const header = container.append("h1")
         .text("Carats of Color")
@@ -84,22 +102,22 @@ d3.json('datagems.json').then(data => {
         .style("margin-top", "20px")
         .style("margin", "10px 20px");
 
-    const subhead = container.append("h2")
-        .text("Exploring the colors of the Smithsonian’s gem collection")
-        .style("text-align", "left")
-        .style("margin", "10px 20px");
 
-    const description = container.append("p")
-        .html("The Smithsonian boasts one of the largest and most colorful gem collections in the world. <p><br> Hover over any color to see the breakdown of the total carats of all of the gems in the Smithsonian’s collection,and the types of gems in that color.<p> Click on any color to see an additional breakdown of color variations within that specific color.<p>Use the dropdown to look specifically at a certain type of gemstone.")
-        .style("text-align", "left")
-        .style("margin", "10px 20px")
-        .style("margin-right", "40px");
-
+    // Create a container for the dropdown and back button
+    const controlContainer = container.append("div")
+        .style("display", "flex")
+        .style("align-items", "center");
 
     // Create a dropdown menu
-    const dropdown = container.append("select")
+    const dropdown = controlContainer.append("select")
         .attr("id", "gem-type-dropdown")
         .style("margin", "10px 20px")
+        .style("background-color", "#303030") // Change background color
+        .style("font-size", "16px") // Change font size
+        .style("color", "#ffffff") // Change text color
+        .style("border", "2px solid #ffffff") // Change border
+        .style("border-radius", "5px") // Add border radius
+        .style("padding", "5px") // Add padding
         .on("change", function () {
             const selectedType = this.value;
             if (isSubTreemapVisible) {
@@ -108,6 +126,7 @@ d3.json('datagems.json').then(data => {
                 drawTreemap(selectedType === "All" ? null : selectedType);
             }
         });
+
     // Add options to the dropdown
     dropdown.selectAll("option")
         .data(gemTypes)
@@ -117,10 +136,23 @@ d3.json('datagems.json').then(data => {
         .text(d => d.charAt(0).toUpperCase() + d.slice(1)); // Capitalize the first letter
 
     // Add back button
-    const backButton = container.append("button")
+    const backButton = controlContainer.append("button")
         .attr("id", "back-button")
         .text("Back")
         .style("display", "none")
+        .style("margin", "10px 20px")
+        .style("margin-left", "10px") // Add margin to the left of the button
+        .on("mouseover", function () {
+            backButton.style("background-color", "#cde4e563")
+                .style("color", "#ffffff")
+                .style("cursor", "pointer")
+                .style("border", "2px solid #303030");
+        })
+        .on("mouseout", function () {
+            backButton.style("background-color", "#303030")
+                .style("color", "#ffffff")
+                .style("border", "2px solid #ffffff");
+        })
         .on("click", function () {
             isSubTreemapVisible = false;
             const selectedType = dropdown.property("value");
@@ -142,8 +174,8 @@ d3.json('datagems.json').then(data => {
     });
 
     function drawTreemap(filterType = null) {
-        const width = window.innerWidth * 0.75;
-        const height = window.innerHeight * 0.70;
+        const width = window.innerWidth * 0.70;
+        const height = window.innerHeight * 0.75;
 
         // Clear any existing SVG elements
         container.selectAll("svg").remove();
@@ -420,7 +452,7 @@ d3.json('datagems.json').then(data => {
                 <strong>Carat:</strong><br>${largestGem.numericCarat} ct<br><br><br>
                 <strong style="color: ${highlightColor};">TOP TYPES OF GEMS IN THE COLLECTION</strong><br><br>
             `);
-            d3.select("#info-container h2")
+            d3.select("#color-name")
                 .text(d.data.key.toUpperCase())
                 .style("color", highlightColor);
 
@@ -473,9 +505,13 @@ d3.json('datagems.json').then(data => {
         })
             .on("mouseout", function () {
                 d3.select("#info-container").style("border-left-color", "#ccc");
-                d3.select("#info-content").html("Hover over a rectangle to see details.");
-                d3.select("#info-container h2")
-                    .text("Gemstone Information")
+                d3.select("#info-content").html("<b>Hover</b> over any color to see the breakdown of the total carats of all of the gems in the " +
+                    "Smithsonian's collection, and the types of gems in that color.<br><br>" +
+                    "<b>Click</b> on any color to see an additional breakdown of color variations within that specific " +
+                    "color.<br><br>" +
+                    "<b>Use the dropdown</b> to look specifically at a certain type of gemstone.");
+                d3.select("#color-name")
+                    .text("")
                     .style("color", ""); // Reset the text color;
                 d3.select(this).select("text").style("stroke", "none");
 
@@ -586,8 +622,8 @@ d3.json('datagems.json').then(data => {
 
     // Your existing drawSubTreemap function
     function drawSubTreemap(primaryColor, data, filterType = null) {
-        const width = window.innerWidth * 0.75;
-        const height = window.innerHeight * 0.70;
+        const width = window.innerWidth * 0.70;
+        const height = window.innerHeight * 0.75;
 
         // Define specific colors for specific groups
         const colorMapping = {
@@ -717,7 +753,7 @@ d3.json('datagems.json').then(data => {
             .attr("height", d => d.y1 - d.y0)
             .attr("fill", d => {
                 if (colorSubcatMapping[d.data.key] === "medium") {
-                    return primaryColor;
+                    return colorMapping[primaryColor];
                 }
                 return colorSubcatMapping[d.data.key] || "#000000"; // Use colorSubcat or default to black
             })
@@ -827,11 +863,11 @@ d3.json('datagems.json').then(data => {
                     <strong>Carat:</strong><br> ${largestGem.numericCarat} ct<br><br><br>
                      <strong style="color: ${highlightColor};">TOP TYPES OF GEMS IN THE COLLECTION</strong><br><br>
                 `);
-            d3.select("#info-container h2").text(d.data.key.toUpperCase() + " " + primaryColor.toUpperCase());
+            d3.select("#color-name").text(d.data.key.toUpperCase() + " " + primaryColor.toUpperCase());
 
             // Determine the text color (white or black) based on the rectangle color
             const textColor = getTextColorBasedOnBackground(color);
-            d3.select(this).select("text").style("stroke", textColor).style("stroke-width", 3);
+            d3.select(this).select("text").style("stroke", textColor).style("stroke-width", 2);
 
             // Create bar chart data
             const barChartData = d.data.data.reduce((acc, gem) => {
@@ -868,8 +904,12 @@ d3.json('datagems.json').then(data => {
         })
             .on("mouseout", function () {
                 d3.select("#info-container").style("border-left-color", "#ccc");
-                d3.select("#info-content").html("Hover over a rectangle to see details.");
-                d3.select("#info-container h2").text("Gemstone Information");
+                d3.select("#info-content").html("<b>Hover</b> over any color to see the breakdown of the total carats of all of the gems in the " +
+                    "Smithsonian's collection, and the types of gems in that color.<br><br>" +
+                    "<b>Click</b> on any color to see an additional breakdown of color variations within that specific " +
+                    "color.<br><br>" +
+                    "<b>Use the dropdown</b> to look specifically at a certain type of gemstone.");
+                d3.select("#color-name").text("");
                 d3.select(this).select("text").style("stroke", "none");
 
                 // Remove the bar chart
