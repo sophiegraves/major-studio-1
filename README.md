@@ -1,5 +1,20 @@
 # major-studio-1
 
+## Updated Qual Visualization
+### Main Page
+![image](https://github.com/user-attachments/assets/e1f41a8a-e06c-450c-8581-16f2040f9a5e)
+
+### When Hovering
+![image](https://github.com/user-attachments/assets/6f945f14-62b9-4439-a5d0-3cdd39d796b3)
+
+### Filtered by Gem Type
+![image](https://github.com/user-attachments/assets/335a1a61-c8df-49c4-9a73-a9079747f72b)
+
+### Within a specific color
+![image](https://github.com/user-attachments/assets/3b818ea2-3f3b-4d8c-bd92-03d56677b8fb)
+
+
+
 ## Qual Visualization Prototype
 
 ### Main Page
