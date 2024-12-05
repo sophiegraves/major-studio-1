@@ -15,7 +15,7 @@
       }
 
             svg:hover .st1 {
-        fill: #ff94C9;
+        fill: #ff94C9; 
       }
 
 
