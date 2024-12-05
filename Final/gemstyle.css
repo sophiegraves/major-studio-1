@@ -1,0 +1,205 @@
+/* Set the background color of the body to a really dark grey */
+html,
+body {
+    background-color: #303030 !important;
+    font-family: 'Jura', sans-serif;
+    color: #fff;
+    height: 100%;
+}
+
+h1 {
+    color: #fff;
+    font-size: 72px;
+    font-weight: 300;
+    font-family: 'Jura', sans-serif;
+    margin: 10;
+    padding: 5;
+}
+
+h2 {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 300;
+    margin: 5;
+    padding: 5;
+}
+
+h3 {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+}
+
+/* Style for the tree map nodes */
+.node {
+    border: solid 1px #fff;
+    font: 30px 'Jura', sans-serif;
+    line-height: 30px;
+    overflow: hidden;
+    position: absolute;
+    text-indent: 2px;
+}
+
+/* Style for the text within the nodes */
+.node text {
+    pointer-events: none;
+    fill: #000;
+    /*text-anchor: start;*/
+    font-family: 'Jura', sans-serif;
+    overflow: hidden;
+    /* Hide overflow text */
+    text-overflow: ellipsis;
+    /* Add ellipsis for overflow text */
+}
+
+#main-container {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    /* Align items to the top */
+}
+
+#map-container {
+    flex: 1;
+}
+
+#info-container {
+    width: 400px;
+    height: 90%;
+    padding: 20px;
+    border-right: 5px solid #ccc;
+    background-color: #303030;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+
+.info-spacing {
+    margin-bottom: 10px;
+
+    /* Adjust the value as needed */
+}
+
+/* styles.css */
+#back-button {
+    background-color: #303030;
+    color: #ffffff;
+    padding: 10px 20px;
+    /* Padding */
+    border: 2px solid #ffffff;
+    /* No border */
+    border-radius: 5px;
+    /* Rounded corners */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    font-size: 14px;
+    /* Font size */
+    margin-top: 10px;
+    /* Margin at the top */
+    margin-left: 20px;
+}
+
+#explore-buttons {
+    margin-bottom: 10px;
+    background-color: #303030;
+    color: #ffffff;
+    padding: 10px 10px;
+    /* Padding */
+}
+
+#explore-buttons button {
+    background-color: #303030;
+    color: #ffffff;
+    padding: 2px 20px;
+    /* Padding */
+    border: .5px solid #898989;
+    /* No border */
+    border-radius: 5px;
+    /* Rounded corners */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    font-size: 12px;
+    font-family: 'Jura', sans-serif;
+    margin-left: 0px;
+    margin-right: 10px;
+
+}
+
+#explore-buttons button:hover {
+    background-color: #9f9f9f63;
+    /* Darker green on hover */
+}
+
+#explore-buttons button.active {
+    background-color: #d4d4d4a4;
+    color: #000000;
+    /* Lighter green on click */
+}
+
+#dropdown-container {
+    margin-bottom: 20px;
+    background-color: #303030;
+    position: relative;
+    top: 20px;
+    font-family: 'Jura', sans-serif;
+    /* Adjust this value to position the dropdown below the header */
+    left: 5px;
+    z-index: 10;
+}
+
+#backButton:hover {
+    background-color: #cde4e563;
+    /* lighter gray on hover */
+}
+
+.shiny {
+    fill: url(#shiny-gradient);
+}
+
+#shiny-gradient {
+    stop-color: rgba(255, 255, 255, 0.5);
+    stop-opacity: 0.5;
+}
+
+#slider-container {
+    position: absolute;
+    top: 15px;
+    /* Adjust this value to position the slider below the header */
+    right: 10px;
+    z-index: 10;
+}
+
+#color-dropdown {
+    background-color: #303030;
+    border-radius: 5px;
+    color: #ffffff;
+    position: relative;
+    top: 20px;
+    font-family: 'Jura', sans-serif;
+    /* Adjust this value to position the dropdown below the header */
+    left: 5px;
+    z-index: 10;
+}
+
+#country-dropdown {
+    background-color: #303030;
+    border-radius: 5px;
+    color: #ffffff;
+    position: relative;
+    top: 20px;
+    font-family: 'Jura', sans-serif;
+    /* Adjust this value to position the dropdown below the header */
+    left: 5px;
+    z-index: 10;
+}

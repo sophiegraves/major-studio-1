@@ -1,10 +1,28 @@
 /* Set the background color of the body to a really dark grey */
+
+
 html,
 body {
     background-color: #303030 !important;
     font-family: 'Jura', sans-serif;
     height: 100%;
 }
+
+#IntroPage {
+    text-align: center;
+}
+
+#intro-head {
+    color: #a62a2a;
+    font-size: 80px;
+    font-weight: 500;
+    margin: 10;
+    padding: 5;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 
 h1 {
     color: #fff;
@@ -13,6 +31,8 @@ h1 {
     margin: 10;
     padding: 5;
 }
+
+
 
 h2 {
     color: #fff;
