@@ -486,23 +486,23 @@ function renderMap() {
             })
             .catch(error => console.error('Error loading the data:', error));
     }).catch(error => console.error('Error loading the world map:', error));
-}
-// Function to filter data based on selected color
-function filterData(data, selectedColor) {
-    if (selectedColor === 'all') {
-        return data;
-    }
-    return data.filter(d => d.primaryColor === selectedColor);
-}
 
-// Function to filter data based on selected country
-function filterDataByCountry(data, selectedCountry) {
-    if (selectedCountry === 'all') {
-        return data;
+    // Function to filter data based on selected color
+    function filterData(data, selectedColor) {
+        if (selectedColor === 'all') {
+            return data;
+        }
+        return data.filter(d => d.primaryColor === selectedColor);
     }
-    return data.filter(d => d.country === selectedCountry);
-}
 
+    // Function to filter data based on selected country
+    function filterDataByCountry(data, selectedCountry) {
+        if (selectedCountry === 'all') {
+            return data;
+        }
+        return data.filter(d => d.country === selectedCountry);
+    }
+}
 
 
 renderMap();
