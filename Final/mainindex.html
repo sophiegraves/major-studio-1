@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Visualization</title>
+    <link rel="stylesheet" href="gemstyle.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://unpkg.com/scrollama"></script> <!-- Ensure this is loaded -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="module" src="testgems.js" defer></script> <!-- Ensure this is loaded after scrollama -->
+
+</head>
+
+<body>
+    <div id="IntroPage" class="page-section visible">
+        <h1 id="intro-head">UNEARTHED</h1>
+        <h2 id="intro-subhead">Exploring Different Facets of the Smithsonian's Gem Collection</h2>
+        <br>
+        <div id="icon-container">
+            <a href="#learn-gems" class="intro-link">
+                <object type="image/svg+xml" data="Images/gemicon.svg" class="intro-icon"></object>
+                <span class="icon-label">About The Collection</span>
+            </a>
+            <a href="#main-map" class="intro-link">
+                <object type="image/svg+xml" data="Images/geoicon.svg" class="intro-icon"></object>
+                <span class="icon-label">Explore by Origin</span>
+            </a>
+            <a href="#main-tree" class="intro-link">
+                <object type="image/svg+xml" data="Images/coloricon.svg" class="intro-icon"></object>
+                <span class="icon-label">Explore by Color</span>
+            </a>
+            <a href="#notable-gems" class="intro-link">
+                <object type="image/svg+xml" data="Images/jewelryicon.svg" class="intro-icon"></object>
+                <span class="icon-label">Notable Gems <br>in the Collection</span>
+            </a>
+        </div>
+    </div>
+
+
+
+    <div id="main-map" class="page-section">
+        <div id="map-info">
+            <h2 id="constant-map">Explore by Origin</h2>
+            <div id="dropdown-container">
+                <select id="country-dropdown" style="display: block;">
+                    <option value="all">All Countries</option>
+                </select>
+            </div>
+            <div id="color-buttons-container"></div>
+            <br>
+
+            <div id="map-control"></div>
+            <br>
+            <h2 id="country-filter-name"></h2><br>
+            <div id="country-filter-chart"></div>
+            <p id="geo-info-content"><b>Hover</b> over any circle to see more information about a specific gem on the
+                map<br><br>
+                <b>Click</b> on any color to look specifically at where the gems in that color originate.<br><br>
+                <b>Use the dropdown</b> to look specifically at the gems in the collection from a speciic country.<br>
+            </p>
+
+        </div>
+        <div id="map-container">
+            <!-- The SVG map will be appended here by D3 -->
+            <h2 id="country-name"></h2>
+            <div id="zoom-controls">
+                <img id="zoom-in" src="Images/zoomin.svg" alt="Zoom In">
+                <img id="zoom-out" src="Images/zoomout.svg" alt="Zoom Out">
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="main-tree" class="page-section">
+        <div id="tree-info">
+            <h2 id="constant-tree">Explore by Color</h2>
+            <div id="tree-control"></div>
+            <h2 id="color-name"></h2>
+            <p id="tree-info-content">
+                The Smithsonian boasts one of the largest - and most colorful - gem collections
+                in the world. Here, we explore all of the different shades and hues within the collection. <br><br>
+                <b>Hover</b> over any color to see the breakdown of the total carats of all of the
+                gems
+                in the
+                Smithsonian’s collection, and the types of gems in that color.<br><br>
+                <b>Click</b> on any color to see an additional breakdown of color variations within that specific
+                color.<br><br>
+                <b>Use the dropdown</b> to look specifically at a certain type of gemstone.<br>
+            </p>
+
+        </div>
+        <div id="treemap-container">
+            <div id="treemap">
+            </div>
+        </div>
+
+    </div>
+
+    <div id="notable-gems" class="page-section">
+        <div id="notable-info">
+            <h2 id="constant-notable">Notable Gems in the Collection</h2><br><br>
+            <h3 id="notable-name"></h3><br>
+            <p id="notable-info-content">
+                The Smithsonian’s collection is home to some of the most famous and valuable gems in the world. Here, we
+                explore some of the most notable pieces in the collection. <br><br>
+                <b>Scroll to see some highlights, and learn more about their backstories.</b>
+            </p>
+            <p id="notable-pic-attribution"></p>
+        </div>
+        <div class="step" id="notable-gems-step">
+            <img src="GemImages/hopediamond.jpg" alt="Gem 1">
+        </div>
+        <br><br><br>
+        <div class="step" id="notable-gems-step">
+            <img src="GemImages/AmericanGolden_ellenm1.jpg" alt="Gem 2">
+        </div>
+        <div class="step" id="notable-gems-step">
+            <img src="GemImages/kimberlydiamond.jpg" alt="Gem 3">
+        </div>
+        <div class="step" id="notable-gems-step">
+            <img src="GemImages/deyoungpink.jpg" alt="Gem 4">
+        </div>
+        <!-- Add more images as needed -->
+    </div>
+
+    <div id="learn-gems" class="page-section">
+        <h1 id="learn-more-head">Gems at the Smithsonian</h1>
+        <div id="learn-more-container">
+            <div id="learn-more-content">
+                <h2 id="learn-more-subhead">With nearly 10,000 gems from nearly 100 countries, the Smithsonian has one
+                    of the
+                    largest collections in the world. Let's take a closer look at their collection.
+                </h2>
+                <div id="overall-charts">
+                    <h2 id="gem-chart-title">Types of Gems in the Collection</h2>
+                    <h3 id="chart-2-info"> While the Smithsonian has a diverse collection of gems, Agate - a type of
+                        quartz - is the most common type of gem in the Smithsonian's collection, with
+                        <b>921</b> pieces.
+                    </h3><br><br>
+                    <div id="gem-chart-1">
+                    </div>
+                    <h2 id="learn-more-subhead2">Gems are commonly featured in jewelry, so it's no surprise that the
+                        Smithsonian's collection boasts a wide variety of impressive pieces. Let's take a look at the
+                        types of jewelry in the collection. </h2>
+                    <br><br>
+                    <h2 id="gem-chart-title">Jewelry Pieces in the Collection</h2>
+                    <h3 id="chart-2-info"> Of the <b>542</b> recorded pieces of jewelry in the collection, nearly a
+                        third are necklaces, including many notable pieces like a necklace belonging to Napoleon
+                        Bonaparte's wife, the famous Hope Diamond, and the Kimberley Diamond,
+                        pictured below. Read more about these gems in the Notable Gems section.
+                    </h3>
+                    <div id="gem-chart-2"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="back-to-top" style="display: none;">Back to Main Page</button>
+
+    <footer>
+        <p id="footer-text">Sophie Graves 2025</p>
+    </footer>
+
+</body>
+
+</html>
