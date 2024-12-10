@@ -97,52 +97,147 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 //EXPLORE THE COLLECTION BY ORIGIN
-const initialWidth = window.innerWidth * 0.7;
-const initialHeight = window.innerHeight * 0.75;
-const verticalOffset = 20; // Adjust this value to make room for the heading
+const initialWidth = window.innerWidth;
+const initialHeight = window.innerHeight;
 const bottomMargin = 10; // Margin at the bottom of the map
-const width = window.innerWidth * 0.75;
-const height = window.innerHeight - bottomMargin;
+const width = window.innerWidth;
+const height = window.innerHeight;
+//const maxRadius = 60; // Set the maximum radius for the circles
 
 const projection = d3.geoMercator()
     .center([0, 0])
-    .scale(initialWidth / 6)
-    .translate([initialWidth / 2, initialHeight / 2 + verticalOffset]); // Center the map
+    .scale((initialWidth / 2 / Math.PI) * 1.1) // Adjust the scale to fit the full width of the map
+    .translate([initialWidth / 2, initialHeight / 2]); // Center the map
 
 const path = d3.geoPath().projection(projection);
 
-const svg = d3.select('#main-map').append('svg')
-    .attr('width', '75%')
+const svg = d3.select('#map-container').append('svg')
+    .attr('width', '100%')
     .attr('height', '100%')
     .attr('viewBox', `0 0 ${initialWidth} ${initialHeight}`)
     .attr('preserveAspectRatio', 'xMidYMid meet');
 
 // Create groups for map and circles
-const mapGroup = svg.append('g').attr('class', 'map');
+const mapGroup = svg.append('g').attr('class', 'map').attr('id', 'map-visual');
 const circlesGroup = svg.append('g').attr('class', 'circles');
 
+// Define the maximum radius for the circles
+const maxRadius = 10; // Set the maximum radius for the circles
 
-// Zoom handler
 const zoom = d3.zoom()
     .scaleExtent([1, 8]) // Set the zoom scale extent
     .on('zoom', (event) => {
-        mapGroup.attr('transform', event.transform);
-        circlesGroup.attr('transform', event.transform);
+        const transform = event.transform;
+        mapGroup.attr('transform', transform);
+        circlesGroup.attr('transform', transform);
+
+        // Update the circle radius based on the zoom scale
+        const sensitivityFactor = 1; // Adjust this factor to increase sensitivity
+        circlesGroup.selectAll('circle')
+            .attr('r', d => Math.min(maxRadius, 5 / transform.k * sensitivityFactor)); // Adjust the base radius as needed
     });
 
 svg.call(zoom);
 
+function resetMap() {
+    // Reset the projection to its initial state
+    projection
+        .center([0, 0])
+        .scale((initialWidth / 2 / Math.PI) * 1.1) // Adjust the scale to fit the full width of the map
+        .translate([initialWidth / 2, initialHeight / 2]); // Center the map
 
+    // Update the SVG and map elements
+    svg.attr('viewBox', `0 0 ${initialWidth} ${initialHeight}`);
+    mapGroup.selectAll('path').attr('d', path);
+    updateCircles(data); // Re-render circles with the new projection
 
-// Function to populate the dropdown with unique colors
-function populateDropdown(data) {
-    const colorDropdown = document.getElementById('color-dropdown');
+    // Reset the zoom
+    svg.transition()
+        .duration(750)
+        .call(
+            zoom.transform,
+            d3.zoomIdentity.translate(0, 0).scale(1)
+        );
+}
+
+// Example: Add event listener for navigation back to the main page
+window.addEventListener('popstate', (event) => {
+    if (event.state && event.state.page === 'IntroPage') {
+        resetMap();
+    }
+});
+
+// Example: Add event listener for a specific button click to navigate back to the main page
+document.getElementById('back-to-top').addEventListener('click', () => {
+    resetMap();
+});
+
+// Function to create color filter buttons
+function createColorButtons(data) {
+    // Define the color mapping object
+    const colorMapping = {
+        'red': '#e31e24',
+        'blue': '#3b4eff',
+        'green': '#17b035',
+        'yellow': '#fae52a',
+        'purple': '#c478ff',
+        'orange': '#f58822',
+        'pink': '#de4ba8',
+        'black': '#000000',
+        'white': '#ffffff',
+        'brown': '#8b4513',
+    };
+    const colorContainer = document.getElementById('color-buttons-container');
+    // Add "all colors" button
+    const allColorsButton = document.createElement('button');
+    allColorsButton.value = 'all';
+    allColorsButton.textContent = 'All Colors';
+    allColorsButton.style.backgroundColor = '#ccc';
+    allColorsButton.style.color = '#000';
+    allColorsButton.style.margin = '5px';
+    allColorsButton.style.padding = '5px';
+    //allColorsButton.style.border = 'none';
+    allColorsButton.style.borderRadius = '5px';
+    allColorsButton.addEventListener('click', () => {
+        updateCircles(data);
+
+        // Reset the zoom to the initial state
+        svg.transition()
+            .duration(750)
+            .call(
+                zoom.transform,
+                d3.zoomIdentity.translate(20, 20).scale(.8)
+            );
+
+        // Update the info content with the gem count
+        d3.select('#info-content').html('Hover over a circle to see details.');
+
+    });
+    colorContainer.appendChild(allColorsButton);
     const uniqueColors = [...new Set(data.map(d => d.primaryColor).filter(color => color))];
     uniqueColors.forEach(color => {
-        const option = document.createElement('option');
-        option.value = color;
-        option.textContent = color;
-        colorDropdown.appendChild(option);
+        const button = document.createElement('button');
+        button.value = color;
+        button.textContent = color.charAt(0).toUpperCase() + color.slice(1); // Capitalize the color name
+        button.style.backgroundColor = colorMapping[color] || '#abc1c4';
+        button.style.color = '#fff';
+        button.style.margin = '5px';
+        button.style.padding = '5px';
+        //button.style.border = 'none';
+        button.style.borderRadius = '5px';
+        button.addEventListener('click', () => {
+            const filteredData = filterData(data, color);
+            updateCircles(filteredData);
+
+            // Count the number of gems with the selected color
+            const gemCount = filteredData.length;
+            const gemCountText = `<h3>Number of ${color} gems:</h3> ${gemCount}`;
+
+            // Update the info content with the gem count
+            d3.select('#info-content').html(`Hover over a circle to see details.<br>${gemCountText}`);
+
+        });
+        colorContainer.appendChild(button);
     });
 }
 
@@ -150,7 +245,7 @@ function populateDropdown(data) {
 function populateCountryDropdown(data) {
     const countryDropdown = document.getElementById('country-dropdown');
     const uniqueCountries = [...new Set(data
-        .filter(d => d.lat !== "Unknown" && d.long !== "Unknown") // Filter data points with lat and long not "Unknown"
+        .filter(d => d.lat !== "Unknown" && d.long !== "Unknown" && d.country !== "Unknown") // Filter data points with lat and long not "Unknown"
         .map(d => d.country)
         .filter(country => country)
     )].sort();
@@ -167,9 +262,12 @@ let data; // Define the data variable in a scope accessible to both renderMap an
 
 // Define the updateCircles function
 function updateCircles(data) {
-    // Filter out data points with "Unknown" latitude, longitude, or place values
-    const filteredData = data.filter(d => d.long !== "Unknown" && d.lat !== "Unknown" && d.place !== "Unknown");
 
+    // Ensure the full width of the map is visible for the default view
+    //svg.attr('viewBox', `0 0 ${initialWidth} ${initialHeight}`);
+
+    // Filter out data points with "Unknown" latitude, longitude, or place values
+    const filteredData = data.filter(d => d.long !== "Unknown" && d.lat !== "Unknown" && d.place !== "Unknown" && d.country !== "Unknown");
 
     circlesGroup.selectAll('circle').remove(); // Clear existing circles
 
@@ -232,29 +330,21 @@ function updateCircles(data) {
     // Bring circles group to the front
     circlesGroup.raise();
 
-    // Update the viewbox based on the data points
-    updateViewBox(filteredData);
 }
 
-// Define the updateViewBox function
-function updateViewBox(data) {
-    const minViewBoxWidth = 100; // Minimum width for the viewBox
-    const minViewBoxHeight = 100; // Minimum height for the viewBox
-
-    if (data.length === 1 || data.every(d => d.lat === data[0].lat && d.long === data[0].long)) {
-        // If there is only one data point or all data points have the same lat and long
-        const singlePoint = data[0];
-        const center = projection([parseFloat(singlePoint.long), parseFloat(singlePoint.lat)]);
-        const viewBoxWidth = Math.max(minViewBoxWidth, 100); // Ensure minimum width
-        const viewBoxHeight = Math.max(minViewBoxHeight, 100); // Ensure minimum height
-        const centerX = center[0] - viewBoxWidth / 2;
-        const centerY = center[1] - viewBoxHeight / 2;
-
-        svg.attr('viewBox', `${centerX} ${centerY} ${viewBoxWidth} ${viewBoxHeight}`);
+// Function to update the viewBox dimensions for the default view
+function updateViewBox(data, resetZoom = false) {
+    if (resetZoom) {
+        // Reset the zoom level to show the entire map
+        svg.transition()
+            .duration(750)
+            .call(
+                zoom.transform,
+                d3.zoomIdentity.translate(0, 0).scale(1)
+            );
     } else {
-        // Existing logic for multiple data points with different lat and long values
-        const minLat = d3.min(data, d => parseFloat(d.lat));
-        const maxLat = d3.max(data, d => parseFloat(d.lat));
+        const minLat = d3.min(data, d => parseFloat(d.lat) - 10);
+        const maxLat = d3.max(data, d => parseFloat(d.lat) + 10);
         const minLong = d3.min(data, d => parseFloat(d.long));
         const maxLong = d3.max(data, d => parseFloat(d.long));
 
@@ -264,40 +354,9 @@ function updateViewBox(data) {
         const centerLat = (minLat + maxLat) / 2;
         const centerLong = (minLong + maxLong) / 2;
 
-        let viewBoxWidth, viewBoxHeight;
-        let topLeft, bottomRight;
-
-        if (latDiff > longDiff) {
-            // Determine view based on height
-            topLeft = projection([minLong, maxLat]);
-            bottomRight = projection([maxLong, minLat]);
-            viewBoxWidth = bottomRight[0] - topLeft[0];
-            viewBoxHeight = bottomRight[1] - topLeft[1];
-
-            // Adjust for 10px margin on left and right
-            const leftMargin = 10;
-            const rightMargin = 10;
-            viewBoxWidth += leftMargin + rightMargin;
-            topLeft[0] -= leftMargin;
-        } else {
-            // Determine view based on width
-            topLeft = projection([minLong, maxLat]);
-            bottomRight = projection([maxLong, minLat]);
-            viewBoxWidth = bottomRight[0] - topLeft[0];
-            viewBoxHeight = bottomRight[1] - topLeft[1];
-
-            // Adjust for 10px margin on top and bottom
-            const topMargin = 10;
-            const bottomMargin = 10;
-            viewBoxHeight += topMargin + bottomMargin;
-            topLeft[1] -= topMargin;
-        }
-
-        // Ensure minimum viewBox dimensions
-        viewBoxWidth = Math.max(viewBoxWidth, minViewBoxWidth);
-        viewBoxHeight = Math.max(viewBoxHeight, minViewBoxHeight);
-
         const center = projection([centerLong, centerLat]);
+        const viewBoxWidth = Math.abs(projection([maxLong, centerLat])[0] - projection([minLong, centerLat])[0]);
+        const viewBoxHeight = Math.abs(projection([centerLong, maxLat])[1] - projection([centerLong, minLat])[1]);
         const centerX = center[0] - viewBoxWidth / 2;
         const centerY = center[1] - viewBoxHeight / 2;
 
@@ -305,7 +364,6 @@ function updateViewBox(data) {
     }
 }
 
-// Define the renderMap function
 function renderMap() {
     const width = window.innerWidth * 0.75;
     const height = window.innerHeight - bottomMargin;
@@ -319,13 +377,7 @@ function renderMap() {
             .append('path')
             .attr('d', path)
             .attr('fill', '#6f6f6f')
-            .attr('stroke', '#333')
-            .on('mouseover', function (event, d) {
-                d3.select(this).attr('stroke', 'blue');
-            })
-            .on('mouseout', function (event, d) {
-                d3.select(this).attr('stroke', '#333');
-            });
+            .attr('stroke', '#333');
 
         // Load the JSON data using fetch
         fetch('locationdata.json')
@@ -334,27 +386,15 @@ function renderMap() {
                 data = loadedData; // Assign the loaded data to the global data variable
                 console.log(data); // Log the data to inspect its format
 
-                // Populate the dropdowns with unique colors and countries
-                populateDropdown(data);
+                // Create color filter buttons
+                createColorButtons(data);
+
+                // Populate the country dropdown with unique countries
                 populateCountryDropdown(data);
 
                 // Initial rendering of circles
                 updateCircles(data);
 
-                // Add event listener to the color dropdown
-                const colorDropdown = document.getElementById('color-dropdown');
-                colorDropdown.addEventListener('change', () => {
-                    const selectedColor = colorDropdown.value;
-                    const filteredData = filterData(data, selectedColor);
-                    updateCircles(filteredData);
-
-                    // Count the number of gems with the selected color
-                    const gemCount = filteredData.length;
-                    const gemCountText = selectedColor === 'all' ? '' : `<h3>Number of ${selectedColor} gems:</h3> ${gemCount}`;
-
-                    // Update the info content with the gem count
-                    d3.select('#info-content').html(`Hover over a circle to see details.<br>${gemCountText}`);
-                });
 
                 // Add event listener to the country dropdown
                 const countryDropdown = document.getElementById('country-dropdown');
@@ -365,61 +405,63 @@ function renderMap() {
 
                     // Count the number of gems with the selected country
                     const gemCount = filteredData.length;
-                    const gemCountText = selectedCountry === 'all' ? '' : `<h3>Number of gems in ${selectedCountry}:</h3> ${gemCount}`;
+                    const gemCountText = selectedCountry === 'all' ? '' : `<br><h3>Number of gems in ${selectedCountry}:</h3> ${gemCount}`;
 
                     // Update the info content with the gem count
                     d3.select('#info-content').html(`Hover over a circle to see details.<br>${gemCountText}`);
+                    /*if (selectedCountry === 'all') {
+                        d3.select('#country-name').html(`<h2> </h2>`);
+                    }*/
 
                     // Zoom in on the selected country
                     if (selectedCountry !== 'all') {
-                        const minLat = d3.min(filteredData, d => parseFloat(d.lat)) - 5;
-                        const maxLat = d3.max(filteredData, d => parseFloat(d.lat)) + 5;
-                        const minLong = d3.min(filteredData, d => parseFloat(d.long));
-                        const maxLong = d3.max(filteredData, d => parseFloat(d.long));
+                        d3.select('#country-name').html(`<h2>${selectedCountry.toUpperCase()}</h2>`);
+                        const minLat = d3.min(data, d => parseFloat(d.lat) - 10);
+                        const maxLat = d3.max(data, d => parseFloat(d.lat) + 10);
+                        const minLong = d3.min(data, d => parseFloat(d.long));
+                        const maxLong = d3.max(data, d => parseFloat(d.long));
 
-                        const topLeft = projection([minLong, maxLat]);
-                        const bottomRight = projection([maxLong, minLat]);
+                        const latDiff = maxLat - minLat;
+                        const longDiff = maxLong - minLong;
 
-                        const dx = bottomRight[0] - topLeft[0];
-                        const dy = bottomRight[1] - topLeft[1];
-                        const x = (topLeft[0] + bottomRight[0]) / 2;
-                        const y = (topLeft[1] + bottomRight[1]) / 2;
+                        const centerLat = (minLat + maxLat) / 2;
+                        const centerLong = (minLong + maxLong) / 2;
+
+                        const center = projection([centerLong, centerLat]);
+                        const viewBoxWidth = Math.abs(projection([maxLong, centerLat])[0] - projection([minLong, centerLat])[0]);
+                        const viewBoxHeight = Math.abs(projection([centerLong, maxLat])[1] - projection([centerLong, minLat])[1]);
+                        const centerX = center[0] - viewBoxWidth / 2;
+                        const centerY = center[1] - viewBoxHeight / 2;
                         const maxScale = 3; // Define the maximum scale value
-                        let scale = Math.max(1, Math.min(maxScale, 0.5 / Math.max(dx / width, dy / height)));
-                        const translate = [width / 2 - scale * x, height / 2 - scale * y];
-
-                        svg.transition()
-                            .duration(750)
-                            .call(
-                                zoom.transform,
-                                //d3.zoomIdentity.translate(translate[0], translate[0]).scale(scale)
-                            );
-                    } else {
+                        let scale = Math.max(1, Math.min(maxScale, 0.5 / Math.max(latDiff / width, longDiff / height)));
                         svg.transition()
                             .duration(750)
                             .call(
                                 zoom.transform,
                                 d3.zoomIdentity.translate(0, 0).scale(1)
+                                //.scale(scale)
+                                //d3.zoomIdentity.translate(x, y).scale(scale)
                             );
+                        svg.attr('viewBox', `${centerX} ${centerY} ${viewBoxWidth} ${viewBoxHeight}`);
+
+
+
+                    } else if (selectedCountry === 'all') {
+                        d3.select('#country-name').html(`<h2> </h2>`);
+                        // Reset the zoom and projection to default values
+                        svg.transition()
+                            .duration(500)
+                            .call(
+                                resetMap()
+                            );
+
+                        // Reset the viewBox to its initial state
+                        svg.attr("viewBox", `0 0 ${width} ${height}`);
                     }
-                });
 
-                // Add event listeners to the buttons
-                const exploreByColorButton = document.getElementById('explore-by-color');
-                const exploreByCountryButton = document.getElementById('explore-by-country');
 
-                exploreByColorButton.addEventListener('click', () => {
-                    document.getElementById('color-dropdown').style.display = 'block';
-                    document.getElementById('country-dropdown').style.display = 'none';
-                    exploreByColorButton.classList.add('active');
-                    exploreByCountryButton.classList.remove('active');
-                });
-
-                exploreByCountryButton.addEventListener('click', () => {
-                    document.getElementById('color-dropdown').style.display = 'none';
-                    document.getElementById('country-dropdown').style.display = 'block';
-                    exploreByCountryButton.classList.add('active');
-                    exploreByColorButton.classList.remove('active');
+                    // Update the viewbox based on the data points
+                    updateViewBox(filteredData);
                 });
 
                 // Add zoom in and zoom out functionality
@@ -428,36 +470,55 @@ function renderMap() {
                 const zoomFactor = 1.25;
 
                 zoomInButton.addEventListener('click', () => {
-                    const currentScale = projection.scale();
-                    projection.scale(currentScale * zoomFactor);
-                    mapGroup.selectAll('path').attr('d', path);
-                    updateCircles(data); // Re-render circles with the new projection
+                    zoomMap(zoomFactor);
                 });
 
                 zoomOutButton.addEventListener('click', () => {
-                    const currentScale = projection.scale();
-                    projection.scale(currentScale / zoomFactor);
-                    mapGroup.selectAll('path').attr('d', path);
-                    updateCircles(data); // Re-render circles with the new projection
+                    zoomMap(1 / zoomFactor);
                 });
 
-                // Add window resize event listener
-                window.addEventListener('resize', () => {
-                    const newWidth = window.innerWidth * 0.75;
-                    const newHeight = window.innerHeight - bottomMargin;
+                function zoomMap(factor) {
+                    const currentScale = projection.scale();
+                    const currentTranslate = projection.translate();
+                    const newScale = currentScale * factor;
 
-                    // Calculate the new scale and translation to fit the map within the window
-                    const aspectRatio = initialWidth / initialHeight;
-                    const newAspectRatio = newWidth / newHeight;
-                    const newScale = (newAspectRatio > aspectRatio) ? newHeight / initialHeight * (initialWidth / 6) : newWidth / initialWidth * (initialWidth / 6);
-                    const newTranslate = [newWidth / 2, newHeight / 2 + verticalOffset]; // Center the map
+                    // Calculate the current center of the viewBox
+                    const centerX = initialWidth / 2;
+                    const centerY = initialHeight / 2;
 
-                    projection
-                        .translate(newTranslate)
-                        .scale(newScale);
+                    // Calculate the new translation to keep the center of the viewBox centered
+                    const newTranslate = [
+                        centerX - (centerX - currentTranslate[0]) * (newScale / currentScale),
+                        centerY - (centerY - currentTranslate[1]) * (newScale / currentScale)
+                    ];
+
+                    // Apply the new scale and translation
+                    projection.scale(newScale).translate(newTranslate);
 
                     // Update the map and circles with the new projection
-                    svg.attr('width', newWidth).attr('height', newHeight);
+                    mapGroup.selectAll('path').attr('d', path);
+                    updateCircles(data); // Re-render circles with the new projection
+                }
+
+
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    const newWidth = window.innerWidth;
+                    const newHeight = window.innerHeight - bottomMargin;
+
+
+                    // Calculate the new scale and translation to fit the map within the window
+                    // const newScale = newWidth / initialWidth * (initialWidth / 6);
+                    const newTranslate = [400, newHeight / 2]; // Align left edge and center mid-point
+
+                    projection
+                        .center([0, 0])
+                        .scale((initialWidth / 2 / Math.PI) * 1.1 / zoomFactor) // Adjust the scale to fit the full width of the map
+                        .translate([initialWidth / 2, initialHeight / 2]);
+                    //.scale(newScale);
+
+                    // Update the map and circles with the new projection
+                    svg.attr('width', newWidth - 400).attr('height', newHeight);
                     mapGroup.selectAll('path').attr('d', path);
                     updateCircles(data); // Re-render circles with the new projection
                 });
@@ -465,7 +526,6 @@ function renderMap() {
             .catch(error => console.error('Error loading the data:', error));
     }).catch(error => console.error('Error loading the world map:', error));
 }
-
 // Function to filter data based on selected color
 function filterData(data, selectedColor) {
     if (selectedColor === 'all') {
@@ -482,9 +542,9 @@ function filterDataByCountry(data, selectedCountry) {
     return data.filter(d => d.country === selectedCountry);
 }
 
+
+
 renderMap();
-
-
 
 // Handle window resize
 window.addEventListener('resize', () => {
@@ -494,17 +554,21 @@ window.addEventListener('resize', () => {
     // Calculate the new scale and translation to fit the map within the window
     const aspectRatio = initialWidth / initialHeight;
     const newAspectRatio = newWidth / newHeight;
-    const newScale = (newAspectRatio > aspectRatio) ? newHeight / initialHeight * (initialWidth / 6) : newWidth / initialWidth * (initialWidth / 6);
-    const newTranslate = [newWidth / 2, newHeight / 2 + verticalOffset]; // Center the map
+    // const newScale = (newWidth / initialWidth) ? newHeight / initialHeight * (initialWidth / 6) : newWidth / initialWidth * (initialWidth / 6);
+    const newScale = newWidth / initialWidth * (initialWidth / 6);
+    const newTranslate = [newWidth / 2 + 300, newHeight / 2]; // Center the map
 
     projection
         .translate(newTranslate)
         .scale(newScale);
 
     // Update the map and circles with the new projection
+    svg.attr('width', newWidth).attr('height', newHeight);
     mapGroup.selectAll('path').attr('d', path);
     updateCircles(data); // Re-render circles with the new projection
 });
+
+
 
 
 //EXPLORE THE COLLECTION BY COLOR
@@ -633,7 +697,7 @@ d3.json('locationdata.json').then(data => {
             backButton.style("background-color", "#cde4e563")
                 .style("color", "#ffffff")
                 .style("cursor", "pointer")
-                .style("border", "2px solid #303030");
+                .style("border", "2px solid #ffffff");
         })
         .on("mouseout", function () {
             backButton.style("background-color", "#303030")
@@ -841,7 +905,7 @@ d3.json('locationdata.json').then(data => {
         // Add this function to create a bar chart
         function createBarChart(data, containerId, barColor) {
             const margin = { top: 20, right: 50, bottom: 30, left: 0 };
-            const containerWidth = 410; // Fixed width of the container
+            const containerWidth = 475; // Fixed width of the container
             const width = containerWidth - margin.left - margin.right;
             const height = 200 - margin.top - margin.bottom;
 
@@ -875,7 +939,6 @@ d3.json('locationdata.json').then(data => {
                 .attr("fill", barColor); // Use the passed color
 
 
-
             const xAxis = svg.append("g")
                 .attr("class", "x-axis")
                 .attr("transform", `translate(0,${height})`)
@@ -887,7 +950,7 @@ d3.json('locationdata.json').then(data => {
                 .enter().append("text")
                 .attr("class", "label")
                 .attr("x", d => x(d.type) + x.bandwidth() / 2)
-                .attr("y", d => y(d.count) - 5)
+                .attr("y", d => y(d.count) - 6)
                 .attr("text-anchor", "middle")
                 .attr("fill", "white") // Set text color to white
                 .text(d => d.count);
@@ -906,7 +969,7 @@ d3.json('locationdata.json').then(data => {
                     words.forEach((word, i) => {
                         text.append("tspan")
                             .attr("x", 0)
-                            .attr("dy", i === 0 ? 0 : "1.2em")
+                            .attr("dy", i === 0 ? "4px" : "1.3em") // Adjust the dy value to 3px for the first line
                             .text(word);
                     });
                 });
@@ -943,16 +1006,6 @@ d3.json('locationdata.json').then(data => {
                 .text(d.data.key.toUpperCase())
                 .style("color", highlightColor);
 
-            // Update bar colors on hover
-            d3.selectAll(".bar")
-                .attr("fill", function (d) {
-                    if (d.data.key === "clear") {
-                        return "lightblue"; // Set color to light blue for "clear" group
-                    } else {
-                        return baseColor; // Use the base color for other groups
-                    }
-                });
-
             // Determine the text color (white or black) based on the rectangle color
             const color = colorMapping[d.data.key];
             const textColor = getTextColorBasedOnBackground(color);
@@ -986,9 +1039,11 @@ d3.json('locationdata.json').then(data => {
 
             // Determine bar color
             const barColor = (d.data.key === "clear" || d.data.key === "black") ? "lightblue" : originalColor;
-
             // Create the bar chart with the determined color
+
             createBarChart(top5Data, "tree-info", barColor);
+
+
         })
             .on("mouseout", function () {
                 d3.select("#tree-info").style("border-left-color", "#ccc");
@@ -1022,7 +1077,7 @@ d3.json('locationdata.json').then(data => {
     // Define the createBarChart function in the global scope
     function createBarChart(data, containerId, barColor) {
         const margin = { top: 20, right: 50, bottom: 30, left: 0 };
-        const containerWidth = 410; // Fixed width of the container
+        const containerWidth = 475; // Fixed width of the container
         const width = containerWidth - margin.left - margin.right;
         const height = 200 - margin.top - margin.bottom;
 
@@ -1084,8 +1139,9 @@ d3.json('locationdata.json').then(data => {
                 words.forEach((word, i) => {
                     text.append("tspan")
                         .attr("x", 0)
-                        .attr("dy", i === 0 ? 0 : "1.2em")
+                        .attr("dy", i === 0 ? "4px" : "1.3em")
                         .text(word);
+
                 });
             });
 
@@ -1094,7 +1150,7 @@ d3.json('locationdata.json').then(data => {
             .on("mouseover", function (event, d) {
                 d3.select(this)
                     .transition()
-                    .duration(500) // Duration of the animation in milliseconds
+                    .duration(7500) // Duration of the animation in milliseconds
                     .attr("y", y(d.count))
                     .attr("height", height - y(d.count));
             })
@@ -1443,14 +1499,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     element.classList.add('is-active');
 
                     // Update the content in the #notable-info-content and #notable-name containers
-                    const { name, 'content-1': content1, 'subhead-1': subhead1, 'content-2': content2, 'subhead-2': subhead2, 'content-3': content3 } = contents[index] || { name: 'Default Name', 'content-1': 'Default content', 'subhead-1': 'Default subhead', 'content-2': 'Default content' };
+                    const { name,
+                        'content-1': content1,
+                        'subhead-1': subhead1,
+                        'content-2': content2,
+                        'subhead-2': subhead2,
+                        'content-3': content3 } = contents[index] ||
+                        {
+                            name: 'Default Name',
+                            'content-1': 'Default content',
+                            'subhead-1': 'Default subhead',
+                            'content-2': 'Default content'
+                        };
                     document.getElementById('notable-name').innerHTML = name;
                     document.getElementById('notable-info-content').innerHTML =
-                        `<p>${content1}</p>
-                        <br><h3>${subhead1}</h3>
-                        <br><p>${content2}</p>
-                        <br><h3>${subhead2}</h3>
-                        <br><p>${content3}</p>`;
+                        `<h3>${content1}</h3>
+                        <br><h2>${subhead1}</h2>
+                        <br><h3>${content2}</h3>
+                        <br><h2>${subhead2}</h2>
+                        <br><h3>${content3}</h3>`;
 
 
                 })
@@ -1465,15 +1532,294 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to get content for each step
     function getContentForStep(index) {
         const contents = [
-            { name: 'DeYoung Pink Diamond', content: 'Content for DeYoung Pink Diamond: Detailed description of DeYoung Pink Diamond.' },
+            { name: 'Hope Diamond', content: 'Content for DeYoung Pink Diamond: Detailed description of DeYoung Pink Diamond.' },
             { name: 'Hope Diamond', content: 'Content for Hope Diamond: Detailed description of Hope Diamond.' },
             { name: 'Kimberly Diamond', content: 'Content for Kimberly Diamond: Detailed description of Kimberly Diamond.' },
+            { name: 'American Golden', content: 'Content for American Golden: Detailed description of American Golden.' },
             // Add more content as needed
         ];
         return contents[index] || { name: 'Default Name', content: 'Default content' };
     }
 
-
 });
 
 
+// LEARN ABOUT GEMS
+d3.json('locationdata.json').then(data => {
+    // Function to capitalize the first letter of each word
+    function capitalizeWords(str) {
+        return str.replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    // Process the data to count the total number of each type of gem, ignoring text in parentheses
+    const gemCounts = Array.from(d3.group(data, d => {
+        let type = d.type;
+        const varMatch = type.match(/\(var\.\s*([^)]+)\)/);
+        if (varMatch) {
+            // Extract the word after "(var." and before ")"
+            type = varMatch[1];
+        }
+        // Normalize any type containing "agate" to "Agate"
+        if (type.toLowerCase().includes("agate")) {
+            type = "Agate";
+        }
+        // Capitalize the type
+        type = capitalizeWords(type);
+        return type;
+    }), ([key, value]) => ({ key, value: value.length }));
+
+    // Sort the data from highest to lowest
+    gemCounts.sort((a, b) => b.value - a.value);
+
+    // Keep only the top 20 gems
+    const topGemCounts = gemCounts.slice(0, 20);
+
+    // Log the processed data to check for issues
+    console.log(topGemCounts);
+
+    // Set up the SVG container
+    const margin = { top: 20, right: 30, bottom: 300, left: 100 }; // Increased left margin
+    const width = 600 - margin.left - margin.right;
+    const height = Math.ceil(topGemCounts.length * 20); // Adjust height based on the number of gem types
+
+    const svg = d3.select('#gem-chart-1')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Create scales
+    const x = d3.scaleLinear()
+        .domain([0, d3.max(topGemCounts, d => d.value)])
+        .nice()
+        .range([0, width]);
+
+    const y = d3.scaleBand()
+        .domain(topGemCounts.map(d => d.key))
+        .range([0, height])
+        .padding(0.1);
+
+    // Create axes
+    svg.append('g')
+        .attr('class', 'y-axis')
+        .attr('id', 'y-axis-type')
+        .call(d3.axisLeft(y))
+        .selectAll('text')
+        .style('font-size', '12px') // Adjust font size for clarity
+        .style('text-anchor', 'end') // Align text to the end
+        .attr('dx', '-0.5em') // Adjust horizontal position
+        .attr('dy', '0.25em'); // Adjust vertical position
+
+    // Create bars
+    const bars = svg.selectAll('.bar')
+        .data(topGemCounts)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', 0)
+        .attr('y', d => y(d.key))
+        .attr('width', 0) // Start with width 0 for animation
+        .attr('height', y.bandwidth())
+        .attr('fill', '#90ee90'); // Set the fill color to light green
+
+    // Add data labels
+    const labels = svg.selectAll('.label')
+        .data(topGemCounts)
+        .enter().append('text')
+        .attr('class', 'label')
+        .attr('id', "type-chart-label")
+        .attr('x', d => x(d.value) + 5) // Position the label to the right of the bar
+        .attr('y', d => y(d.key) + y.bandwidth() / 2)
+        .attr('dy', '0.35em') // Adjust vertical alignment
+        .attr('opacity', 0) // Start with opacity 0
+        .text(d => d.value);
+
+    // Intersection Observer to animate bars when they come into view
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = d3.select(entry.target);
+                bar.transition()
+                    .duration(1000)
+                    .attr('width', d => x(d.value)) // Animate width from 0 to the correct value
+                    .on('end', function (d) {
+                        d3.select(this.parentNode).selectAll('.label')
+                            .filter(labelData => labelData.key === d.key)
+                            .transition()
+                            .duration(500)
+                            .attr('opacity', 1); // Animate opacity from 0 to 1
+                    });
+                observer.unobserve(entry.target); // Stop observing once animated
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Observe each bar
+    bars.each(function () {
+        observer.observe(this);
+    });
+
+    // Add the image to the right of the bar chart
+    const imgWidth = 600;
+    const imgHeight = 600;
+    const svgWidth = width + margin.left + margin.right + imgWidth + 500;
+    const captionText1 = "An Agate sample from the collection"; // Adjust SVG width to accommodate the image
+
+    // Update the SVG container width
+    d3.select('#gem-chart-1 svg')
+        .attr('width', svgWidth);
+
+    svg.append('image')
+        .attr('xlink:href', 'GemImages/agate1.jpg')
+        .attr('x', width + margin.right + 250) // Position to the right of the chart
+        .attr('y', -100)
+        .attr('width', imgWidth)
+        .attr('height', imgHeight)
+        .attr('opacity', 0) // Start with opacity 0 for fade-in effect
+        .transition()
+        .delay(2500) // Delay to ensure bars are rendered
+        .duration(1500)
+        .attr('opacity', 1); // Fade-in effect
+
+    // Add the caption text
+    svg.append('text')
+        .attr('x', width + margin.right + 250 + imgWidth / 2) // Center the text under the image
+        .attr('y', imgHeight - 175) // Position below the image
+        .attr('text-anchor', 'middle') // Center align the text
+        .attr('opacity', 0) // Start with opacity 0 for fade-in effect
+        .text(captionText1)
+        .attr('fill', 'white') // Set text color to white
+        .transition()
+        .delay(3000) // Delay to ensure the image has finished appearing
+        .duration(1500)
+        .attr('opacity', 1); // Fade-in effect
+
+    // New chart for jewelry types
+    const jewelryCounts = Array.from(d3.group(data.filter(d => d.jewelryType !== "Unknown"), d => d.jewelryType), ([key, value]) => ({ key, value: value.length }));
+
+    // Sort the data from highest to lowest
+    jewelryCounts.sort((a, b) => b.value - a.value);
+
+    // Keep only the top 10 jewelry types
+    const topJewelryCounts = jewelryCounts.slice(0, 10);
+
+    // Set up the SVG container for the new chart
+    const margin2 = { top: 100, right: 30, bottom: 250, left: 100 };
+    const width2 = 800 - margin2.left - margin2.right;
+    const height2 = Math.ceil(topJewelryCounts.length * 45);
+
+    const svg2 = d3.select('#gem-chart-2')
+        .append('svg')
+        .attr('width', width2 + margin2.left + margin2.right)
+        .attr('height', height2 + margin2.top + margin2.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin2.left},${margin2.top})`);
+
+    // Create scales for the new chart
+    const x2 = d3.scaleBand()
+        .domain(topJewelryCounts.map(d => d.key))
+        .range([0, width2])
+        .padding(0.1);
+
+    const y2 = d3.scaleLinear()
+        .domain([0, d3.max(topJewelryCounts, d => d.value)])
+        .nice()
+        .range([height2, 0]);
+
+    // Create axes for the new chart
+    svg2.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(0,${height2})`)
+        .call(d3.axisBottom(x2))
+        .selectAll('text')
+        .style('color', 'white')
+        .style('font-family', 'Jura')
+        .style('font-size', '14px')
+        .style('text-anchor', 'right')
+        .attr('dx', '-0.5em')
+        .attr('dy', '0.25em');
+
+    // Create bars for the new chart
+    const bars2 = svg2.selectAll('.bar')
+        .data(topJewelryCounts)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x2(d.key))
+        .attr('y', height2) // Start at the bottom
+        .attr('width', x2.bandwidth())
+        .attr('height', 0) // Start with height 0 for animation
+        .attr('fill', '#e7ec93');
+
+    // Add data labels to the new chart
+    const labels2 = svg2.selectAll('.label')
+        .data(topJewelryCounts)
+        .enter().append('text')
+        .attr('id', "type-chart-label")
+        .attr('class', 'label')
+        .attr('x', d => x2(d.key) + x2.bandwidth() / 2)
+        .attr('y', d => y2(d.value) - 5) // Position above the bar
+        .attr('text-anchor', 'middle')
+        .attr('opacity', 0) // Start with opacity 0
+        .text(d => d.value);
+
+    // Intersection Observer to animate bars when they come into view
+    const observer2 = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = d3.select(entry.target);
+                bar.transition()
+                    .duration(1000)
+                    .attr('height', d => height2 - y2(d.value))
+                    .attr('y', d => y2(d.value)) // Animate height from 0 to the correct value
+                    .on('end', function (d) {
+                        d3.select(this.parentNode).selectAll('.label')
+                            .filter(labelData => labelData.key === d.key)
+                            .transition()
+                            .duration(500)
+                            .attr('opacity', 1); // Animate opacity from 0 to 1
+                    });
+                observer2.unobserve(entry.target); // Stop observing once animated
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Observe each bar in the second chart
+    bars2.each(function () {
+        observer2.observe(this);
+    });
+
+    // Add the image to the right of the second bar chart
+    const imgWidth2 = 600;
+    const imgHeight2 = 600;
+    const svgWidth2 = width2 + margin2.left + margin2.right + imgWidth2 + 20;
+    const captionText2 = "The Kimberley Diamond, set in a necklace"; // Adjust SVG width to accommodate the image
+
+    // Update the SVG container width
+    d3.select('#gem-chart-2 svg')
+        .attr('width', svgWidth2);
+
+    svg2.append('image')
+        .attr('xlink:href', 'GemImages/kimberlydiamond.jpg')
+        .attr('x', width2 + margin2.right + 20) // Position to the right of the chart
+        .attr('y', -120)
+        .attr('width', imgWidth2)
+        .attr('height', imgHeight2)
+        .attr('opacity', 0) // Start with opacity 0 for fade-in effect
+        .transition()
+        .delay(6000) // Delay to ensure bars are rendered
+        .duration(3000)
+        .attr('opacity', 1); // Fade-in effect
+
+    // Add the caption text
+    svg2.append('text')
+        .attr('x', width2 + margin2.right + 20 + imgWidth2 / 2) // Center the text under the image
+        .attr('y', imgHeight2 - 100) // Position below the image
+        .attr('text-anchor', 'middle') // Center align the text
+        .attr('opacity', 0) // Start with opacity 0 for fade-in effect
+        .text(captionText2)
+        .attr('fill', 'white') // Set text color to white
+        .transition()
+        .delay(5000) // Delay to ensure the image has finished appearing
+        .duration(1500)
+        .attr('opacity', 1); // Fade-in effect
+});
