@@ -1,5 +1,9 @@
 # major-studio-1
 
+## Final Project
+
+
+
 ## Updated Qual Visualization
 ### Main Page
 ![image](https://github.com/user-attachments/assets/e1f41a8a-e06c-450c-8581-16f2040f9a5e)
@@ -13,7 +17,10 @@
 ### Within a specific color
 ![image](https://github.com/user-attachments/assets/3b818ea2-3f3b-4d8c-bd92-03d56677b8fb)
 
-
+### Next Steps
+- Thinking about ways to bring in images of the gems to show these colors
+- Looking at additional fields in the data to see how to expand on this/ what other information I can incorporate (dataset includes coordinates/location data)
+- Finding ways to highlight some key pieces in the collection in a way that kind of mimics exploring the collection in person. 
 
 ## Qual Visualization Prototype
 
@@ -28,7 +35,6 @@
 - Looking for additional data sets to bring in to combine & add info e.g. value of gems -> which are the mosts valuable gems in the collection
 - Updating the text & title
 - Reformatting tweaks
-
 
 
 
@@ -54,7 +60,11 @@ Using data from the Smithsonian's collection of paintings - filtered by searchin
 ![image2](https://github.com/user-attachments/assets/388e0871-be05-4c6a-b96b-3d3358c94237)
 
 <br></br>
-## Screenshots of Quantitative Assignment
+
+## Quantitative Assignment
+Ultimately I decided to look at the quilts in the Smithsonian's American Art Collection based on the year that each quilt was created, and using the real aspect ratio as the dimensions of each quilt. Hovering on a quilt will show additional information about the quilt, including a link to the site on the Smithsonian for even more additional information. 
+
+### Screenshots of Quantitative Assignment 
 When opening the site
 ![image](https://github.com/user-attachments/assets/431434e5-bd88-47f4-a45a-54879da9f776)
 
@@ -63,3 +73,23 @@ When clicking on a quilt
 
 When filtering based on year
 ![image](https://github.com/user-attachments/assets/6ee92768-e4eb-416f-ae8e-52cf453bfc38)
+
+<br><br>
+## Quantitative Assignment Sketches
+
+### Sketch 1 - First Ladies in the National Portrait Gallery
+Looking at the portraits of first ladies in the National Portrait Gallery over time - the National Portrait Gallery has the largest collection of presedential portraits, but we don't hear as much about the portraits of the first ladies. In this visual, you would see a bubble frequency chart based on the number of portraits of each first lady that you can hover over to see more info on the portraits. You can also look at the data chronologically to see how the number of portraits has or hasn't changed over time.
+<br>
+![image](https://github.com/user-attachments/assets/77da0d3f-16b1-4137-b1f7-f24667419f1c)
+
+
+### Sketch 2 - Unidentified Portraits in the National Portrait Gallery
+The National Portrait Gallery is known primarily for portraits of high-profile, influential people who had a role in shaping the US (politcally, culturally, scientifically, architecturally etc.) - but I am interested to understand the "unknown" people in the national portrait gallery, looking at the number of portraits of unidentified people, and being able to filter based on year to see any trends.
+<br>
+![image](https://github.com/user-attachments/assets/5cbb23f8-a4cf-4ca7-85ff-39727f20f2f9)
+
+
+### Sketch 3 - Where Meteorites are From
+The minerals collection has a number of metorites in the collection. This visualization would explore where these meteorites were sourced from, to look at potential trends in where these "alien" rocks land on our planet. 
+<br>
+![image](https://github.com/user-attachments/assets/8f86aacf-55e0-4209-a355-3ded39ec6018)
